@@ -1,0 +1,54 @@
+name: build-testcase
+on:
+  push:
+    branches:
+      - 'main'
+      - 'master'
+      - 'release*'
+      
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and upload
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Get branch name
+        id: extract_branch
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+
+      - name: Build
+        shell: bash
+        run: |
+          pushd doc
+          curl -O  https://oss.kubeclipper.io/test/pandoc
+          sudo chmod +x pandoc
+          mds=''
+          for f in `find . -name "*.md" | sort -V`; do
+              mds="$mds $f"
+          done
+          mds=`echo $mds | sed 's/(/\\\\(/g' | sed 's/)/\\\\)/g'`
+          eval "./pandoc -s --toc --template=template.html --metadata pagetitle='CaaS测试用例' --toc-depth=4 -o ./testcases.html $mds"
+          popd
+        
+      - name: Setup ossutil
+        uses: manyuanrong/setup-ossutil@v2.0
+        with:
+          endpoint:  ${{ secrets.OSS_ENDPOINT }}
+          access-key-id: ${{ secrets.OSS_ACCESS_KEY }}
+          access-key-secret: ${{ secrets.OSS_ACCESS_SECRET }}
+          #sts-token: "sts_token"
+      - name: Upload to oss
+        run: |
+          ossutil cp -rf doc/testcases.html oss://${{ secrets.OSS_BUCKET }}/testcase/${{ steps.extract_branch.outputs.branch }}/
+          
+
+
+
