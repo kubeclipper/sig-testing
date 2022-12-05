@@ -35,7 +35,7 @@ jobs:
               mds="$mds $f"
           done
           mds=`echo $mds | sed 's/(/\\\\(/g' | sed 's/)/\\\\)/g'`
-          eval "./pandoc -s --toc --template=template.html --metadata pagetitle='CaaS测试用例' --toc-depth=4 -o ./testcases.html $mds"
+          eval "./pandoc -s --toc --template=template.html --metadata pagetitle='KubeClipper测试用例' --toc-depth=4 -o ./testcases.html $mds"
           popd
         
       - name: Setup ossutil
