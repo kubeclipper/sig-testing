@@ -47,7 +47,7 @@ jobs:
           #sts-token: "sts_token"
       - name: Upload to oss
         run: |
-          ossutil cp -rf doc/testcases.html oss://${{ secrets.OSS_BUCKET }}/testcase/${{ steps.extract_branch.outputs.branch }}/
+          ossutil cp -rf doc/testcases.html oss://${{ secrets.OSS_BUCKET }}/test/testcase/${{ steps.extract_branch.outputs.branch }}/
           
 
 
